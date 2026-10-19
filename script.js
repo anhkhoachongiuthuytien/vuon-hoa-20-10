@@ -1,14 +1,19 @@
 /* ==========================================================
    CẢ MỘT VƯỜN THƯƠNG... | CHÚC MỪNG 20/10
-   Dynamic Garden Generation, Swaying Physics, Canvas Falling Leaves,
-   Greeting Card Modal, Interactive Petal Bursts & Romantic Piano Synth
+   Designed to 100% replicate the viral TikTok aesthetic by Trịnh Hảo IT
+   - Authentic acoustic guitar BGM (assets/music.mp3)
+   - 45+ lush paper quilled roses and buds in pastel palette
+   - Dynamic curved stems fanning outward with realistic leaves
+   - Canvas drifting clouds, falling petals & fluttering leaves
+   - Elegant vintage greeting card with smooth slide dismissal
    ========================================================== */
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Elements
+  // DOM Elements
   const canvas = document.getElementById('falling-leaves-canvas');
   const gardenContainer = document.getElementById('gardenContainer');
   const heroFlower = document.getElementById('heroFlower');
+  const topTitle = document.getElementById('topTitle');
   const bottomMessage = document.getElementById('bottomMessage');
   const wakeGardenBtn = document.getElementById('wakeGardenBtn');
   const cardOverlay = document.getElementById('cardOverlay');
@@ -19,7 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const musicLabel = document.getElementById('musicLabel');
   const clickEffects = document.getElementById('clickEffects');
 
-  // Check URL query parameters for custom recipient name
+  // Check URL query parameters for custom recipient name (e.g. ?to=Thúy+Tiên or ?name=Em)
   const urlParams = new URLSearchParams(window.location.search);
   const recipientName = urlParams.get('to') || urlParams.get('name');
   if (recipientName) {
@@ -27,7 +32,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (subtitle) {
       subtitle.textContent = `Gửi ${recipientName} thương mến,`;
     }
-    const topTitle = document.getElementById('topTitle');
     if (topTitle) {
       topTitle.textContent = `Dành tặng ${recipientName}, cả một vườn thương.`;
     }
@@ -36,7 +40,52 @@ document.addEventListener('DOMContentLoaded', () => {
   let gardenBloomed = false;
 
   // ==========================================================
-  // 1. FALLING LEAVES & PETALS CANVAS ANIMATION
+  // 1. BACKGROUND MUSIC (ORIGINAL TIKTOK AUDIO)
+  // ==========================================================
+  let bgMusic = null;
+  let isPlayingMusic = false;
+
+  function initMusic() {
+    if (!bgMusic) {
+      bgMusic = new Audio('assets/music.mp3');
+      bgMusic.loop = true;
+      bgMusic.volume = 0.75;
+
+      bgMusic.addEventListener('play', () => {
+        isPlayingMusic = true;
+        musicToggleBtn.classList.add('playing');
+        musicIcon.textContent = '🎶';
+        musicLabel.textContent = 'Tắt nhạc';
+      });
+
+      bgMusic.addEventListener('pause', () => {
+        isPlayingMusic = false;
+        musicToggleBtn.classList.remove('playing');
+        musicIcon.textContent = '🎵';
+        musicLabel.textContent = 'Nhạc';
+      });
+    }
+
+    bgMusic.play().catch(err => {
+      console.log('Autoplay blocked, waiting for user gesture:', err);
+    });
+  }
+
+  musicToggleBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (!bgMusic) {
+      initMusic();
+      return;
+    }
+    if (isPlayingMusic) {
+      bgMusic.pause();
+    } else {
+      bgMusic.play().catch(e => console.log(e));
+    }
+  });
+
+  // ==========================================================
+  // 2. FALLING LEAVES & PETALS CANVAS
   // ==========================================================
   const ctx = canvas.getContext('2d');
   let width, height;
@@ -48,38 +97,39 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('resize', resizeCanvas);
   resizeCanvas();
 
-  // Color palettes for falling leaves and soft petals
-  const leafColors = [
-    '#4a8d54', '#3d7846', '#5c9e67', '#6cb077', '#34663b',
-    '#f9a8bc', '#fbcfe8', '#fed7aa', '#bbf7d0', '#bae6fd'
+  // Natural palette for falling leaves & rose petals
+  const particleColors = [
+    '#3e7e45', '#4f9457', '#5ca865', '#2f6935', // green leaves
+    '#f7a6b8', '#fbcfe8', '#fed7aa', '#fde047', // petals: pink, blush, peach, yellow
+    '#bae6fd', '#ddd6fe', '#ffffff'              // sky blue, lavender, white
   ];
 
-  class Particle {
+  class FallingParticle {
     constructor(isInitial = false) {
       this.reset(isInitial);
     }
 
     reset(isInitial = false) {
       this.x = Math.random() * width;
-      this.y = isInitial ? Math.random() * height : -20 - Math.random() * 50;
-      this.size = 7 + Math.random() * 11;
-      this.speedY = 0.7 + Math.random() * 1.3;
-      this.speedX = -0.5 + Math.random() * 1.0;
-      this.amplitude = 15 + Math.random() * 25;
-      this.frequency = 0.01 + Math.random() * 0.02;
+      this.y = isInitial ? Math.random() * height : -20 - Math.random() * 40;
+      this.size = 6 + Math.random() * 10;
+      this.speedY = 0.65 + Math.random() * 1.25;
+      this.speedX = -0.4 + Math.random() * 0.8;
+      this.amplitude = 18 + Math.random() * 26;
+      this.frequency = 0.012 + Math.random() * 0.018;
       this.phase = Math.random() * Math.PI * 2;
       this.rotation = Math.random() * Math.PI * 2;
       this.rotSpeed = -0.02 + Math.random() * 0.04;
       this.tumble = Math.random() * Math.PI * 2;
-      this.tumbleSpeed = 0.02 + Math.random() * 0.03;
-      this.color = leafColors[Math.floor(Math.random() * leafColors.length)];
-      this.isLeaf = Math.random() > 0.35; // 65% leaf, 35% petal
-      this.opacity = 0.45 + Math.random() * 0.45;
+      this.tumbleSpeed = 0.02 + Math.random() * 0.035;
+      this.color = particleColors[Math.floor(Math.random() * particleColors.length)];
+      this.isLeaf = Math.random() > 0.4; // 60% leaves, 40% petals
+      this.opacity = 0.5 + Math.random() * 0.45;
     }
 
     update(time) {
       this.y += this.speedY;
-      this.x += Math.sin(time * this.frequency + this.phase) * 0.8 + this.speedX;
+      this.x += Math.sin(time * this.frequency + this.phase) * 0.85 + this.speedX;
       this.rotation += this.rotSpeed;
       this.tumble += this.tumbleSpeed;
 
@@ -98,24 +148,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
       ctx.beginPath();
       if (this.isLeaf) {
-        // Pointed oval leaf shape with center vein
+        // Pointed oval green leaf with central vein
         ctx.moveTo(0, -this.size);
         ctx.quadraticCurveTo(this.size * 0.55, 0, 0, this.size);
         ctx.quadraticCurveTo(-this.size * 0.55, 0, 0, -this.size);
         ctx.fill();
 
-        // Subtle center crease
         ctx.strokeStyle = 'rgba(0, 0, 0, 0.12)';
-        ctx.lineWidth = 0.8;
+        ctx.lineWidth = 0.7;
         ctx.beginPath();
         ctx.moveTo(0, -this.size * 0.8);
         ctx.lineTo(0, this.size * 0.8);
         ctx.stroke();
       } else {
-        // Rounder curved petal
-        ctx.moveTo(0, -this.size * 0.8);
-        ctx.bezierCurveTo(this.size * 0.8, -this.size * 0.5, this.size * 0.8, this.size * 0.5, 0, this.size);
-        ctx.bezierCurveTo(-this.size * 0.8, this.size * 0.5, -this.size * 0.8, -this.size * 0.5, 0, -this.size * 0.8);
+        // Soft rounded rose petal
+        ctx.moveTo(0, -this.size * 0.85);
+        ctx.bezierCurveTo(this.size * 0.85, -this.size * 0.45, this.size * 0.85, this.size * 0.45, 0, this.size);
+        ctx.bezierCurveTo(-this.size * 0.85, this.size * 0.45, -this.size * 0.85, -this.size * 0.45, 0, -this.size * 0.85);
         ctx.fill();
       }
 
@@ -123,7 +172,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  const particles = Array.from({ length: 32 }, () => new Particle(true));
+  const particles = Array.from({ length: 34 }, () => new FallingParticle(true));
 
   let animTime = 0;
   function animateCanvas() {
@@ -138,20 +187,20 @@ document.addEventListener('DOMContentLoaded', () => {
   animateCanvas();
 
   // ==========================================================
-  // 2. DYNAMIC GARDEN FLOWER GENERATION
+  // 3. FLOWER GARDEN GENERATION
   // ==========================================================
-  const flowerTypes = [
+  const flowerCatalog = [
     { type: 'rose', file: 'assets/rose_pink.png', name: 'pink' },
     { type: 'rose', file: 'assets/rose_peach.png', name: 'peach' },
+    { type: 'rose', file: 'assets/rose_coral.png', name: 'coral' },
     { type: 'rose', file: 'assets/rose_yellow.png', name: 'yellow' },
     { type: 'rose', file: 'assets/rose_green.png', name: 'green' },
     { type: 'rose', file: 'assets/rose_blue.png', name: 'blue' },
     { type: 'rose', file: 'assets/rose_purple.png', name: 'purple' },
-    { type: 'rose', file: 'assets/rose_coral.png', name: 'coral' },
     { type: 'bud', file: 'assets/rosebud_pink.png', name: 'bud-pink' },
     { type: 'bud', file: 'assets/rosebud_peach.png', name: 'bud-peach' },
-    { type: 'bud', file: 'assets/rosebud_blue.png', name: 'bud-blue' },
-    { type: 'bud', file: 'assets/rosebud_yellow.png', name: 'bud-yellow' }
+    { type: 'bud', file: 'assets/rosebud_yellow.png', name: 'bud-yellow' },
+    { type: 'bud', file: 'assets/rosebud_blue.png', name: 'bud-blue' }
   ];
 
   function createFlowerPlant(config) {
@@ -163,7 +212,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const zIndex = config.zIndex;
     const scale = config.scale;
     const isBud = config.type === 'bud';
-    const headSize = isBud ? Math.round(75 * scale) : Math.round(115 * scale);
+    const headSize = isBud ? Math.round(78 * scale) : Math.round(112 * scale);
 
     plant.style.left = `${leftPos}%`;
     plant.style.zIndex = zIndex;
@@ -171,13 +220,16 @@ document.addEventListener('DOMContentLoaded', () => {
     plant.style.setProperty('--head-size', `${headSize}px`);
     plant.style.setProperty('--grow-dur', `${config.growDur}s`);
     plant.style.setProperty('--grow-delay', `${config.growDelay}s`);
-    plant.style.setProperty('--bloom-dur', `${config.bloomDur}s`);
+
+    // Natural fan angle: plants on left lean left, plants on right lean right
+    const leanAngle = config.leanAngle;
+    plant.style.setProperty('--lean-angle', `${leanAngle}deg`);
 
     // Wind sway config
-    plant.style.setProperty('--sway-duration', `${config.swayDur}s`);
     plant.style.setProperty('--sway-min', `${config.swayMin}deg`);
     plant.style.setProperty('--sway-max', `${config.swayMax}deg`);
-    plant.style.animation = `garden-sway ${config.swayDur}s ease-in-out infinite alternate ${config.swayDelay}s`;
+    plant.style.animation = `flower-sprout ${config.growDur}s cubic-bezier(0.34, 1.25, 0.64, 1) forwards ${config.growDelay}s,
+                             garden-sway ${config.swayDur}s ease-in-out infinite alternate ${config.growDelay + config.growDur}s`;
 
     // Inner stem wrap
     const stemWrap = document.createElement('div');
@@ -185,14 +237,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const stem = document.createElement('div');
     stem.className = 'flower-stem';
+    stem.style.setProperty('--stem-curve', `${config.stemCurve}deg`);
     stemWrap.appendChild(stem);
 
-    // Leaves
+    // Leaves attached along stem
     if (config.hasLeftLeaf) {
       const leafL = document.createElement('div');
       leafL.className = 'flower-leaf leaf-left';
-      leafL.style.setProperty('--leaf-w', `${Math.round(34 * scale)}px`);
-      leafL.style.setProperty('--leaf-h', `${Math.round(52 * scale)}px`);
+      leafL.style.setProperty('--leaf-w', `${Math.round(36 * scale)}px`);
+      leafL.style.setProperty('--leaf-h', `${Math.round(54 * scale)}px`);
       leafL.style.setProperty('--leaf-pos', `${config.leafPosL}%`);
       leafL.style.setProperty('--leaf-rot', `${config.leafRotL}deg`);
       stemWrap.appendChild(leafL);
@@ -201,8 +254,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (config.hasRightLeaf) {
       const leafR = document.createElement('div');
       leafR.className = 'flower-leaf leaf-right';
-      leafR.style.setProperty('--leaf-w', `${Math.round(34 * scale)}px`);
-      leafR.style.setProperty('--leaf-h', `${Math.round(52 * scale)}px`);
+      leafR.style.setProperty('--leaf-w', `${Math.round(36 * scale)}px`);
+      leafR.style.setProperty('--leaf-h', `${Math.round(54 * scale)}px`);
       leafR.style.setProperty('--leaf-pos-r', `${config.leafPosR}%`);
       leafR.style.setProperty('--leaf-rot-r', `${config.leafRotR}deg`);
       stemWrap.appendChild(leafR);
@@ -214,14 +267,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const headImg = document.createElement('img');
     headImg.src = config.imgSrc;
-    headImg.alt = 'Hoa';
+    headImg.alt = 'Hoa hồng';
     headImg.className = 'flower-head-img';
     headWrap.appendChild(headImg);
 
     stemWrap.appendChild(headWrap);
     plant.appendChild(stemWrap);
 
-    // Interactivity: clicking a flower makes it give off heart sparkles
+    // Click interactive effect
     plant.addEventListener('click', (e) => {
       e.stopPropagation();
       const rect = headWrap.getBoundingClientRect();
@@ -235,63 +288,65 @@ document.addEventListener('DOMContentLoaded', () => {
     if (gardenBloomed) return;
     gardenBloomed = true;
 
-    // Fade bottom message
-    bottomMessage.classList.add('fade-out');
+    // Start background music
+    initMusic();
 
-    // Create 42 flowers spanning the screen
+    // Fade bottom hint and message
+    bottomMessage.classList.add('fade-out');
+    topTitle.classList.add('fade-out');
+
     const windowH = window.innerHeight;
     const windowW = window.innerWidth;
-    const flowerCount = windowW < 600 ? 28 : 44;
-
-    // We generate 3 layers: back, mid, front
+    // Mobile: 36 flowers; Desktop: 52 flowers for thick, overflowing meadow
+    const flowerCount = windowW < 600 ? 36 : 52;
     const flowersData = [];
 
     for (let i = 0; i < flowerCount; i++) {
-      // Spread positions across screen with pleasant jitter
-      const left = ((i + 0.5) / flowerCount) * 104 - 2 + (Math.random() * 4 - 2);
+      // Evenly distribute positions from left -4% to 104% with random jitter
+      const left = ((i + 0.5) / flowerCount) * 108 - 4 + (Math.random() * 3 - 1.5);
 
-      // Choose layer
+      // Layer selection
       const layerRand = Math.random();
       let layer = 'mid';
       let zIndex = 11;
       let heightPercent = 0.5;
       let scale = 0.85;
 
-      if (layerRand < 0.35) {
-        // Back layer: taller stems, smaller scale
+      if (layerRand < 0.28) {
+        // Back layer: taller stems, slightly smaller scale
         layer = 'back';
         zIndex = 8;
-        heightPercent = 0.55 + Math.random() * 0.22;
-        scale = 0.62 + Math.random() * 0.15;
-      } else if (layerRand < 0.75) {
+        heightPercent = 0.58 + Math.random() * 0.2;
+        scale = 0.65 + Math.random() * 0.15;
+      } else if (layerRand < 0.68) {
         // Mid layer
         layer = 'mid';
         zIndex = 11;
-        heightPercent = 0.42 + Math.random() * 0.2;
-        scale = 0.82 + Math.random() * 0.18;
+        heightPercent = 0.44 + Math.random() * 0.18;
+        scale = 0.85 + Math.random() * 0.18;
       } else {
-        // Front layer: shorter stems, larger scale
+        // Front layer: shorter stems, lush large heads
         layer = 'front';
-        zIndex = 14;
-        heightPercent = 0.28 + Math.random() * 0.18;
-        scale = 1.05 + Math.random() * 0.2;
+        zIndex = 16;
+        heightPercent = 0.26 + Math.random() * 0.18;
+        scale = 1.08 + Math.random() * 0.22;
       }
 
-      // Avoid blocking the exact center hero rose position too heavily
-      if (Math.abs(left - 50) < 6 && layer === 'front') {
-        heightPercent *= 0.8;
-      }
+      // Fan out angle: stems on the left tilt left, stems on right tilt right
+      const centerDist = left - 50; // -50 to +50
+      const leanAngle = (centerDist * 0.38) + (Math.random() * 4 - 2);
+      const stemCurve = (centerDist * 0.12) + (Math.random() * 3 - 1.5);
 
       const stemHeightPx = Math.round(windowH * heightPercent);
 
-      // Select flower asset: 75% full rose, 25% bud
-      const isBud = Math.random() < 0.26;
+      // 75% full rose, 25% bud
+      const isBud = Math.random() < 0.25;
       let selectedFlower;
       if (isBud) {
-        const buds = flowerTypes.filter(f => f.type === 'bud');
+        const buds = flowerCatalog.filter(f => f.type === 'bud');
         selectedFlower = buds[Math.floor(Math.random() * buds.length)];
       } else {
-        const roses = flowerTypes.filter(f => f.type === 'rose');
+        const roses = flowerCatalog.filter(f => f.type === 'rose');
         selectedFlower = roses[Math.floor(Math.random() * roses.length)];
       }
 
@@ -302,13 +357,13 @@ document.addEventListener('DOMContentLoaded', () => {
         zIndex: zIndex,
         imgSrc: selectedFlower.file,
         type: selectedFlower.type,
-        growDur: 1.6 + Math.random() * 0.8,
-        growDelay: Math.random() * 1.8,
-        bloomDur: 1.2 + Math.random() * 0.6,
-        swayDur: 3.5 + Math.random() * 2.2,
-        swayDelay: -(Math.random() * 4),
-        swayMin: -(2.5 + Math.random() * 2),
-        swayMax: +(2.5 + Math.random() * 2),
+        leanAngle: leanAngle,
+        stemCurve: stemCurve,
+        growDur: 1.4 + Math.random() * 0.8,
+        growDelay: Math.random() * 1.5,
+        swayDur: 3.6 + Math.random() * 2.2,
+        swayMin: -(2.5 + Math.random() * 1.8),
+        swayMax: +(2.5 + Math.random() * 1.8),
         hasLeftLeaf: Math.random() > 0.2,
         hasRightLeaf: Math.random() > 0.2,
         leafPosL: 35 + Math.random() * 25,
@@ -318,7 +373,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
-    // Sort by zIndex so DOM order is neat
+    // Sort by zIndex so DOM rendering order is correct
     flowersData.sort((a, b) => a.zIndex - b.zIndex);
 
     flowersData.forEach(cfg => {
@@ -326,21 +381,21 @@ document.addEventListener('DOMContentLoaded', () => {
       gardenContainer.appendChild(plantEl);
     });
 
-    // Bring hero flower to life with fresh burst
+    // Sparkle burst around the center
     createHeartSparkles(windowW / 2, windowH * 0.48);
 
-    // After 3.5s of blooming, show the Greeting Card modal!
+    // After 2.8s of blooming, display the greeting card modal
     setTimeout(() => {
       showGreetingCard();
-    }, 3200);
+    }, 2800);
   }
 
-  // Automatic bloom trigger after 2.8s
+  // Automatic bloom after 3.2s if user hasn't touched yet
   const autoBloomTimer = setTimeout(() => {
     bloomGarden();
-  }, 2800);
+  }, 3200);
 
-  // Manual triggers
+  // User interactions to bloom
   wakeGardenBtn.addEventListener('click', (e) => {
     e.stopPropagation();
     clearTimeout(autoBloomTimer);
@@ -354,7 +409,6 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   document.body.addEventListener('click', (e) => {
-    // If not clicked on buttons or card
     if (!gardenBloomed) {
       clearTimeout(autoBloomTimer);
       bloomGarden();
@@ -364,7 +418,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // ==========================================================
-  // 3. GREETING CARD MODAL LOGIC
+  // 4. GREETING CARD MODAL LOGIC
   // ==========================================================
   function showGreetingCard() {
     cardOverlay.classList.remove('hidden');
@@ -381,7 +435,6 @@ document.addEventListener('DOMContentLoaded', () => {
   admireGardenBtn.addEventListener('click', (e) => {
     e.stopPropagation();
     hideGreetingCard();
-    // Burst particles around button
     createHeartSparkles(window.innerWidth / 2, window.innerHeight / 2);
   });
 
@@ -391,174 +444,31 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // ==========================================================
-  // 4. CLICK SPARKLES & HEART PARTICLES
+  // 5. INTERACTIVE PARTICLES & SPARKLES
   // ==========================================================
-  const burstIcons = ['🌸', '✨', '💖', '🌷', '💕', '🌿', '⭐'];
+  const burstIcons = ['🌸', '✨', '💖', '🌷', '💕', '🌿', '⭐', '🌹'];
 
   function createHeartSparkles(x, y) {
-    const count = 8;
+    const count = 9;
     for (let i = 0; i < count; i++) {
       const p = document.createElement('span');
       p.className = 'burst-particle';
       p.textContent = burstIcons[Math.floor(Math.random() * burstIcons.length)];
 
       const angle = (Math.PI * 2 * i) / count + (Math.random() * 0.4 - 0.2);
-      const distance = 40 + Math.random() * 60;
+      const distance = 45 + Math.random() * 65;
       const dx = Math.cos(angle) * distance;
-      const dy = Math.sin(angle) * distance - 20;
+      const dy = Math.sin(angle) * distance - 25;
 
       p.style.left = `${x}px`;
       p.style.top = `${y}px`;
       p.style.setProperty('--dx', `${dx}px`);
       p.style.setProperty('--dy', `${dy}px`);
       p.style.setProperty('--rot', `${Math.random() * 180 - 90}deg`);
-      p.style.fontSize = `${16 + Math.random() * 12}px`;
+      p.style.fontSize = `${16 + Math.random() * 14}px`;
 
       clickEffects.appendChild(p);
       setTimeout(() => p.remove(), 1200);
     }
   }
-
-  // ==========================================================
-  // 5. ROMANTIC PIANO SYNTHESIZER (WEB AUDIO API)
-  // Plays a lush, romantic, peaceful acoustic piano melody
-  // Zero external assets required, 100% offline & instantaneous!
-  // ==========================================================
-  let audioCtx = null;
-  let isPlayingMusic = false;
-  let melodyTimeout = null;
-
-  function initAudio() {
-    if (!audioCtx) {
-      const AudioContext = window.AudioContext || window.webkitAudioContext;
-      audioCtx = new AudioContext();
-    }
-    if (audioCtx.state === 'suspended') {
-      audioCtx.resume();
-    }
-  }
-
-  // Piano Note Synthesizer with realistic acoustic harmonics & envelope
-  function playPianoNote(freq, duration = 2.0, timeOffset = 0, gainLevel = 0.2) {
-    if (!audioCtx || !isPlayingMusic) return;
-
-    const now = audioCtx.currentTime + timeOffset;
-
-    // Master note gain
-    const noteGain = audioCtx.createGain();
-    noteGain.gain.setValueAtTime(0, now);
-    noteGain.gain.linearRampToValueAtTime(gainLevel, now + 0.015); // Fast piano attack
-    noteGain.gain.exponentialRampToValueAtTime(gainLevel * 0.65, now + 0.15); // Decay
-    noteGain.gain.exponentialRampToValueAtTime(0.0001, now + duration); // Long gentle release
-
-    // Harmonics for rich piano tone
-    const harmonics = [
-      { mult: 1, gain: 1.0 },
-      { mult: 2, gain: 0.5 },
-      { mult: 3, gain: 0.25 },
-      { mult: 4, gain: 0.1 },
-      { mult: 5, gain: 0.04 }
-    ];
-
-    harmonics.forEach(h => {
-      const osc = audioCtx.createOscillator();
-      const hGain = audioCtx.createGain();
-
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(freq * h.mult, now);
-
-      hGain.gain.setValueAtTime(h.gain, now);
-
-      osc.connect(hGain);
-      hGain.connect(noteGain);
-
-      osc.start(now);
-      osc.stop(now + duration);
-    });
-
-    // Warm Low-pass filter
-    const filter = audioCtx.createBiquadFilter();
-    filter.type = 'lowpass';
-    filter.frequency.setValueAtTime(1400, now);
-
-    noteGain.connect(filter);
-    filter.connect(audioCtx.destination);
-  }
-
-  // Romantic chord progression & lyrical melody
-  // Chords: Cmaj7 -> Am9 -> Fmaj7 -> Gsus4/G7
-  const notes = {
-    C3: 130.81, G3: 196.00, B3: 246.94,
-    C4: 261.63, D4: 293.66, E4: 329.63, F4: 349.23, G4: 392.00, A4: 440.00, B4: 493.88,
-    C5: 523.25, D5: 587.33, E5: 659.25, G5: 783.99, A5: 880.00
-  };
-
-  const melodyScore = [
-    // Bar 1: Cmaj7
-    { notes: [notes.C3, notes.G3, notes.E4], time: 0, dur: 3.5, vol: 0.22 },
-    { notes: [notes.B4], time: 0.2, dur: 1.8, vol: 0.25 },
-    { notes: [notes.C5], time: 0.8, dur: 1.6, vol: 0.28 },
-    { notes: [notes.G4], time: 1.4, dur: 1.8, vol: 0.22 },
-    { notes: [notes.E4], time: 2.0, dur: 1.5, vol: 0.18 },
-
-    // Bar 2: Am9
-    { notes: [notes.C3, notes.A4], time: 2.8, dur: 3.5, vol: 0.22 },
-    { notes: [notes.B4], time: 3.2, dur: 1.6, vol: 0.25 },
-    { notes: [notes.C5], time: 3.8, dur: 1.8, vol: 0.28 },
-    { notes: [notes.E5], time: 4.4, dur: 2.2, vol: 0.26 },
-    { notes: [notes.D5], time: 5.2, dur: 1.5, vol: 0.20 },
-
-    // Bar 3: Fmaj7
-    { notes: [notes.C3, notes.F4, notes.A4], time: 6.0, dur: 3.5, vol: 0.22 },
-    { notes: [notes.C5], time: 6.4, dur: 1.8, vol: 0.28 },
-    { notes: [notes.A4], time: 7.0, dur: 1.6, vol: 0.22 },
-    { notes: [notes.G4], time: 7.6, dur: 1.8, vol: 0.24 },
-    { notes: [notes.A4], time: 8.2, dur: 1.5, vol: 0.20 },
-
-    // Bar 4: G7sus4 -> G
-    { notes: [notes.G3, notes.D4, notes.G4], time: 9.0, dur: 3.5, vol: 0.22 },
-    { notes: [notes.B4], time: 9.4, dur: 1.6, vol: 0.26 },
-    { notes: [notes.D5], time: 10.0, dur: 1.8, vol: 0.28 },
-    { notes: [notes.C5], time: 10.8, dur: 2.5, vol: 0.30 }
-  ];
-
-  const loopLengthMs = 12000;
-
-  function playMelodyLoop() {
-    if (!isPlayingMusic) return;
-
-    melodyScore.forEach(item => {
-      item.notes.forEach(noteFreq => {
-        playPianoNote(noteFreq, item.dur, item.time, item.vol);
-      });
-    });
-
-    melodyTimeout = setTimeout(() => {
-      if (isPlayingMusic) {
-        playMelodyLoop();
-      }
-    }, loopLengthMs);
-  }
-
-  function toggleMusic() {
-    initAudio();
-    isPlayingMusic = !isPlayingMusic;
-
-    if (isPlayingMusic) {
-      musicToggleBtn.classList.add('playing');
-      musicIcon.textContent = '🎶';
-      musicLabel.textContent = 'Tắt nhạc';
-      playMelodyLoop();
-    } else {
-      musicToggleBtn.classList.remove('playing');
-      musicIcon.textContent = '🎵';
-      musicLabel.textContent = 'Bật nhạc';
-      clearTimeout(melodyTimeout);
-    }
-  }
-
-  musicToggleBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    toggleMusic();
-  });
 });

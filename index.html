@@ -8,15 +8,15 @@
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="assets/rose_pink.png">
   
-  <!-- Google Fonts: Cormorant Garamond & Playfair Display for elegant Vietnamese typography -->
+  <!-- Google Fonts: Cormorant Garamond, Playfair Display & Quicksand -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Playfair+Display:ital,wght@0,500;0,700;1,400;1,600&family=Quicksand:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Playfair+Display:ital,wght@0,500;0,700;1,400;1,600&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
   
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- Canvas for falling leaves and drifting clouds -->
+  <!-- Canvas for falling leaves and soft rose petals -->
   <canvas id="falling-leaves-canvas"></canvas>
   
   <!-- Drifting Background Clouds -->
@@ -26,12 +26,12 @@
     <div class="cloud cloud-3"></div>
   </div>
 
-  <!-- Top Left Title (from Screenshot 1 & 2) -->
+  <!-- Top Left Title (from TikTok video) -->
   <div class="top-title" id="topTitle">
     Dành bạn, cả một vườn thương.
   </div>
 
-  <!-- Music & Control Buttons (Top Right) -->
+  <!-- Controls (Top Right): Music & Reopen Card -->
   <div class="top-controls">
     <button class="control-btn music-btn" id="musicToggleBtn" title="Bật/Tắt nhạc nền" aria-label="Bật/Tắt nhạc nền">
       <span class="music-icon" id="musicIcon">🎵</span>
@@ -42,35 +42,35 @@
     </button>
   </div>
 
-  <!-- Main Garden Container (where all flowers grow & sway) -->
+  <!-- Main Garden Container (where all flowers sprout & sway) -->
   <div class="garden-container" id="gardenContainer">
-    <!-- Center Initial Flower Plant (First state) -->
-    <div class="flower-plant initial-hero-flower" id="heroFlower">
+    <!-- Center Initial Hero Flower -->
+    <div class="flower-plant initial-hero-flower" id="heroFlower" title="Chạm để nở hoa">
       <div class="flower-stem-wrap">
         <div class="flower-stem"></div>
         <div class="flower-leaf leaf-left"></div>
         <div class="flower-leaf leaf-right"></div>
         <div class="flower-head-wrap">
-          <img src="assets/rose_pink.png" alt="Bông hoa hồng" class="flower-head-img hero-head">
+          <img src="assets/rose_pink.png" alt="Bông hoa hồng đầu tiên" class="flower-head-img hero-head">
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Bottom Message (from Screenshot 1 & 2) -->
+  <!-- Bottom Message & Hint -->
   <div class="bottom-message" id="bottomMessage">
     <span class="bottom-text">Từ một bông hoa, cả khu vườn đang thức giấc...</span>
     <button class="wake-garden-hint" id="wakeGardenBtn">🌸 Đánh thức khu vườn</button>
   </div>
 
-  <!-- Greeting Card Modal (from Screenshot 3) -->
+  <!-- Greeting Card Modal (Exact match to TikTok video) -->
   <div class="card-overlay hidden" id="cardOverlay">
     <div class="greeting-card" id="greetingCard">
       <!-- Inset Decorative Frame -->
       <div class="card-inner-frame">
-        <!-- Top Small Rose Icon -->
+        <!-- Top Rose Icon -->
         <div class="card-rose-icon">
-          <img src="assets/rose_pink.png" alt="Rose icon" class="card-mini-rose">
+          <img src="assets/rose_pink.png" alt="Rose emblem" class="card-mini-rose">
           <div class="card-mini-stem"></div>
         </div>
 
@@ -107,7 +107,7 @@
           </div>
         </div>
 
-        <!-- Button to dismiss card and admire the swaying flower garden -->
+        <!-- Dismiss button to view full garden -->
         <div class="card-action">
           <button class="btn-admire-garden" id="admireGardenBtn">
             Ngắm vườn hoa
@@ -117,7 +117,7 @@
     </div>
   </div>
 
-  <!-- Click Sparkles / Petals Container -->
+  <!-- Interactive Sparkles Container -->
   <div class="click-effects" id="clickEffects"></div>
 
   <script src="script.js"></script>
