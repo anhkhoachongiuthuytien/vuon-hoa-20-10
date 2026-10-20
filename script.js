@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     bgMusic.play().catch(err => {
-      console.log('Autoplay blocked, waiting for user gesture:', err);
+      console.log('Autoplay waiting for user gesture:', err);
     });
   }
 
@@ -212,28 +212,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const zIndex = config.zIndex;
     const scale = config.scale;
     const isBud = config.type === 'bud';
-    const headSize = isBud ? Math.round(78 * scale) : Math.round(112 * scale);
+    const headSize = isBud ? Math.round(75 * scale) : Math.round(112 * scale);
 
     plant.style.left = `${leftPos}%`;
     plant.style.zIndex = zIndex;
-    plant.style.setProperty('--stem-height', `${stemHeight}px`);
-    plant.style.setProperty('--head-size', `${headSize}px`);
     plant.style.setProperty('--grow-dur', `${config.growDur}s`);
     plant.style.setProperty('--grow-delay', `${config.growDelay}s`);
 
-    // Natural fan angle: plants on left lean left, plants on right lean right
-    const leanAngle = config.leanAngle;
-    plant.style.setProperty('--lean-angle', `${leanAngle}deg`);
-
-    // Wind sway config
-    plant.style.setProperty('--sway-min', `${config.swayMin}deg`);
-    plant.style.setProperty('--sway-max', `${config.swayMax}deg`);
-    plant.style.animation = `flower-sprout ${config.growDur}s cubic-bezier(0.34, 1.25, 0.64, 1) forwards ${config.growDelay}s,
-                             garden-sway ${config.swayDur}s ease-in-out infinite alternate ${config.growDelay + config.growDur}s`;
-
-    // Inner stem wrap
+    // Inner stem wrap - handles outward lean and wind breeze sway
     const stemWrap = document.createElement('div');
-    stemWrap.className = 'flower-stem-wrap';
+    stemWrap.className = 'flower-stem-wrap stem-swaying';
+    stemWrap.style.setProperty('--stem-height', `${stemHeight}px`);
+    stemWrap.style.setProperty('--lean-angle', `${config.leanAngle}deg`);
+    stemWrap.style.setProperty('--sway-min', `${config.swayMin}deg`);
+    stemWrap.style.setProperty('--sway-max', `${config.swayMax}deg`);
+    stemWrap.style.setProperty('--sway-dur', `${config.swayDur}s`);
+    stemWrap.style.setProperty('--sway-delay', `${config.swayDelay}s`);
 
     const stem = document.createElement('div');
     stem.className = 'flower-stem';
@@ -244,8 +238,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (config.hasLeftLeaf) {
       const leafL = document.createElement('div');
       leafL.className = 'flower-leaf leaf-left';
-      leafL.style.setProperty('--leaf-w', `${Math.round(36 * scale)}px`);
-      leafL.style.setProperty('--leaf-h', `${Math.round(54 * scale)}px`);
+      leafL.style.setProperty('--leaf-w', `${Math.round(40 * scale)}px`);
+      leafL.style.setProperty('--leaf-h', `${Math.round(36 * scale)}px`);
       leafL.style.setProperty('--leaf-pos', `${config.leafPosL}%`);
       leafL.style.setProperty('--leaf-rot', `${config.leafRotL}deg`);
       stemWrap.appendChild(leafL);
@@ -254,8 +248,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (config.hasRightLeaf) {
       const leafR = document.createElement('div');
       leafR.className = 'flower-leaf leaf-right';
-      leafR.style.setProperty('--leaf-w', `${Math.round(36 * scale)}px`);
-      leafR.style.setProperty('--leaf-h', `${Math.round(54 * scale)}px`);
+      leafR.style.setProperty('--leaf-w', `${Math.round(40 * scale)}px`);
+      leafR.style.setProperty('--leaf-h', `${Math.round(36 * scale)}px`);
       leafR.style.setProperty('--leaf-pos-r', `${config.leafPosR}%`);
       leafR.style.setProperty('--leaf-rot-r', `${config.leafRotR}deg`);
       stemWrap.appendChild(leafR);
@@ -264,6 +258,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Flower Head
     const headWrap = document.createElement('div');
     headWrap.className = 'flower-head-wrap';
+    headWrap.style.setProperty('--head-size', `${headSize}px`);
 
     const headImg = document.createElement('img');
     headImg.src = config.imgSrc;
@@ -297,8 +292,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const windowH = window.innerHeight;
     const windowW = window.innerWidth;
-    // Mobile: 36 flowers; Desktop: 52 flowers for thick, overflowing meadow
-    const flowerCount = windowW < 600 ? 36 : 52;
+    // Mobile: 42 flowers; Desktop: 60 flowers for thick, overflowing meadow
+    const flowerCount = windowW < 600 ? 42 : 60;
     const flowersData = [];
 
     for (let i = 0; i < flowerCount; i++) {
@@ -362,6 +357,7 @@ document.addEventListener('DOMContentLoaded', () => {
         growDur: 1.4 + Math.random() * 0.8,
         growDelay: Math.random() * 1.5,
         swayDur: 3.6 + Math.random() * 2.2,
+        swayDelay: -(Math.random() * 4),
         swayMin: -(2.5 + Math.random() * 1.8),
         swayMax: +(2.5 + Math.random() * 1.8),
         hasLeftLeaf: Math.random() > 0.2,
